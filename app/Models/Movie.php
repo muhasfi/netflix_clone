@@ -4,11 +4,10 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Notifications\Notifiable;
 
 class Movie extends Model
 {
-    use HasFactory,Notifiable;
+    use HasFactory;
 
     protected $table = 'content.movies';
 
@@ -27,6 +26,10 @@ class Movie extends Model
         'url_4k',
     ];
 
+    protected $appends = [
+        'average_rating'
+    ];
+
     protected $casts = [
         'release_date' => 'date',
     ];
@@ -39,4 +42,43 @@ class Movie extends Model
             'category_id'
         );
     }
+
+    public function ratings()
+    {
+        return $this->hasMany(Rating::class);
+    }
+
+    public function getAverageRatingAttribute()
+    {
+        return round($this->ratings()->avg('rating'), 1);
+    }
+
+    public function getStreamingUrl(string $planResolution): string
+    {
+        return match ($planResolution) {
+            '720p' => $this->url_720,
+            '1080p' => $this->url_1080,
+            '4k' => $this->url_4k,
+            default => $this->url_720,
+        };
+    }
+
+
+    public function getFormattedDurationAttributte()
+    {
+        $hours = floor($this->duration / 60);
+        $minutes = $this->duration % 60;
+        $formatted = '';
+
+        if($hours > 0) {
+            $formatted .= "{$hours}h";
+        }
+
+        if ($minutes > 0 || $hours == 0) {
+            $formatted .= "{$minutes}m";
+        }
+
+        return trim($formatted);
+    }
+
 }

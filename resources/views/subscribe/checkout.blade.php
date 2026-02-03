@@ -43,11 +43,7 @@
                 </label>
             </div>
 
-            <form action="{{ route('subscribe.process') }}" method="POST">
-
-                @csrf
-                <input type="hidden" name="plan_id" value="{{ $plan->id }}">
-                <input type="hidden" name="total_payment" value="{{ $plan->price * 0.12 }}">
+            <form action="#" method="POST">
                 <button type="submit" class="w-100 btn btn-green" id="pay-button">Continue</button>
             </form>
         </div>
@@ -55,8 +51,8 @@
 @endsection
 
 @section('scripts')
-    {{-- <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ config('midtrans.client_key') }}"></script> --}}
-    {{-- <script>
+    <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ config('midtrans.client_key') }}"></script>
+    <script>
         const payButton = document.querySelector('#pay-button');
         payButton.addEventListener('click', function(e) {
             e.preventDefault();
@@ -68,10 +64,14 @@
                     },
                     body: JSON.stringify({
                         plan_id: '{{ $plan->id }}',
-                        amount: '{{ $plan->price * 1.1 }}'
+                        amount: {{ (int) ($plan->price * 1.1) }}
                     })
                 })
-                .then(response => response.json())
+                .then(async response => {
+                    const text = await response.text();
+                    console.log(text);
+                    return JSON.parse(text);
+                })
                 .then(data => {
                     if (data.status === 'success') {
                         window.snap.pay(data.snap_token, {
@@ -99,5 +99,5 @@
                     alert('Something went wrong');
                 });
         });
-    </script> --}}
+    </script>
 @endsection

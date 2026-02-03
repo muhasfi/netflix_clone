@@ -11,6 +11,8 @@ class Plan extends Model
     use HasFactory,Notifiable;
 
     protected $table ='billing.plans';
+    protected $connection = 'pgsql';
+    
     protected $fillable = [
         'title',
         'price',
