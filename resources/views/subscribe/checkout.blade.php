@@ -1,103 +1,79 @@
+{{-- ============================================================ --}}
+{{-- checkout.blade.php                                          --}}
+{{-- ============================================================ --}}
 @extends('layouts.subscribe')
 
-@section('title', 'Payment Detail')
-@section('page-title', 'Payment Detail')
+@section('title', 'Detail Pembayaran')
+@section('page-title', 'Pembayaran')
 
 @section('content')
-    <div class="mt-4 text-white card bg-dark border-green">
-        <div class="card-body">
-            <div class="mb-3 row align-items-center">
-                <div class="col-8">
-                    <h5 class="mb-0">{{ $plan->title }} - {{ $plan->duration }} Hari</h5>
-                </div>
-                <div class="col-4 text-end">
-                    <span class="fs-5">Rp.{{ number_format($plan->price, 0, ',', '.') }}</span>
-                </div>
-            </div>
+<div class="cf-checkout-card">
+    <div class="cf-checkout-header">
+        <div class="cf-checkout-plan-name">{{ $plan->title }}</div>
+        <div style="font-size:13px;color:#888;margin-bottom:10px;">{{ $plan->duration }} Hari Langganan</div>
+        <div class="cf-checkout-plan-price">Rp{{ number_format($plan->price, 0, ',', '.') }}</div>
+    </div>
+    <div class="cf-checkout-body">
+        <div class="cf-price-row">
+            <span>Subtotal</span>
+            <span>Rp{{ number_format($plan->price, 0, ',', '.') }}</span>
+        </div>
+        <div class="cf-price-row">
+            <span>PPN 12%</span>
+            <span>Rp{{ number_format($plan->price * 0.12, 0, ',', '.') }}</span>
+        </div>
+        <div class="cf-price-row total">
+            <span>Total Pembayaran</span>
+            <span style="color:var(--cf-red);">Rp{{ number_format($plan->price * 1.1, 0, ',', '.') }}</span>
+        </div>
 
-            <hr class="border-green">
+        <div class="cf-terms">
+            <input type="checkbox" id="terms" required>
+            <label for="terms">
+                Dengan melanjutkan, kamu setuju dengan
+                <a href="#">Syarat & Ketentuan</a> dan
+                <a href="#">Kebijakan Privasi</a> kami.
+            </label>
+        </div>
 
-            <div class="mb-2 row">
-                <div class="col-8">Subtotal</div>
-                <div class="col-4 text-end">Rp.{{ number_format($plan->price, 0, ',', '.') }}</div>
-            </div>
+        <form action="#" method="POST">
+            <button type="submit" class="btn-cf-pay" id="pay-button">
+                <i class="fa-solid fa-lock me-2"></i>Bayar Sekarang
+            </button>
+        </form>
 
-            <div class="mb-2 row">
-                <div class="col-8">Ppn 12%</div>
-                <div class="col-4 text-end">Rp.{{ number_format($plan->price * 0.12, 0, ',', '.') }}</div>
-            </div>
-
-            <hr class="border-green">
-
-            <div class="mb-4 row">
-                <div class="col-8">Total payment</div>
-                <div class="col-4 text-end fw-bold">Rp.{{ number_format($plan->price * 1.1, 0, ',', '.') }}</div>
-            </div>
-
-            <div class="mb-3 form-check">
-                <input class="form-check-input" type="checkbox" id="terms" required>
-                <label class="form-check-label" for="terms">
-                    By continuing the payment, you agree to our
-                    <a href="#" class="text-info">Terms and Conditions</a> and
-                    <a href="#" class="text-info">Privacy Policy</a>
-                </label>
-            </div>
-
-            <form action="#" method="POST">
-                <button type="submit" class="w-100 btn btn-green" id="pay-button">Continue</button>
-            </form>
+        <div style="text-align:center;margin-top:16px;font-size:12px;color:#555;">
+            <i class="fa-solid fa-shield-halved me-1"></i>Pembayaran diproses secara aman via Midtrans
         </div>
     </div>
+</div>
 @endsection
 
 @section('scripts')
-    <script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ config('midtrans.client_key') }}"></script>
-    <script>
-        const payButton = document.querySelector('#pay-button');
-        payButton.addEventListener('click', function(e) {
-            e.preventDefault();
-            fetch('/checkout', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                    },
-                    body: JSON.stringify({
-                        plan_id: '{{ $plan->id }}',
-                        amount: {{ (int) ($plan->price * 1.1) }}
-                    })
-                })
-                .then(async response => {
-                    const text = await response.text();
-                    console.log(text);
-                    return JSON.parse(text);
-                })
-                .then(data => {
-                    if (data.status === 'success') {
-                        window.snap.pay(data.snap_token, {
-                            onSuccess: function(result) {
-                                window.location.href = '/subscribe/success';
-                            },
-                            onPending: function(result) {
-                                window.location.href = '/payment/pending';
-                            },
-                            onError: function(result) {
-                                window.location.href = '/payment/error';
-                            },
-                            onClose: function() {
-                                alert(
-                                    'You closed the payment window without completing the payment'
-                                    );
-                            }
-                        });
-                    } else {
-                        alert('Payment failed to initialize');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('Something went wrong');
+<script src="https://app.sandbox.midtrans.com/snap/snap.js" data-client-key="{{ config('midtrans.client_key') }}"></script>
+<script>
+    const payButton = document.querySelector('#pay-button');
+    payButton.addEventListener('click', function(e) {
+        e.preventDefault();
+        const terms = document.querySelector('#terms');
+        if (!terms.checked) { alert('Harap setujui syarat & ketentuan terlebih dahulu.'); return; }
+        fetch('/checkout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content },
+            body: JSON.stringify({ plan_id: '{{ $plan->id }}', amount: {{ (int) ($plan->price * 1.1) }} })
+        })
+        .then(r => r.json())
+        .then(data => {
+            if (data.status === 'success') {
+                window.snap.pay(data.snap_token, {
+                    onSuccess: () => window.location.href = '/subscribe/success',
+                    onPending: () => window.location.href = '/payment/pending',
+                    onError: () => window.location.href = '/payment/error',
+                    onClose: () => alert('Pembayaran dibatalkan.')
                 });
-        });
-    </script>
+            } else { alert('Pembayaran gagal diinisialisasi.'); }
+        })
+        .catch(err => { console.error(err); alert('Terjadi kesalahan.'); });
+    });
+</script>
 @endsection

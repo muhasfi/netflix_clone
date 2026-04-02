@@ -1,22 +1,20 @@
+{{-- ============================================================ --}}
+{{-- success.blade.php                                           --}}
+{{-- ============================================================ --}}
 @extends('layouts.subscribe')
 
-@section('title', 'Payment Success')
-@section('page-title', 'Payment Success')
+@section('title', 'Pembayaran Berhasil')
+@section('page-title', 'Berhasil')
 
 @section('content')
-    <div class="mt-5 text-center">
-        <img src="{{ asset('assets/img/codeflix_logo.png') }}" alt="Codeflix" class="mb-4" style="height: 60px;">
-        <h2 class="mb-2 text-white">Yay! Selamat Pembayaran Kamu</h2>
-        <h3 class="mb-4 text-white">Telah kami Terima</h3>
-        <div class="mb-4 text-success">
-            <i class="fas fa-check-circle fa-5x"></i>
-        </div>
-        <h4 class="mb-4 text-white">Selamat Menikmati</h4>
-        <a href="/" class="px-5 btn btn-green btn-lg">
-            Mulai Nonton
-        </a>
+<div class="cf-success-wrap">
+    <div class="cf-success-icon">
+        <i class="fa-solid fa-check"></i>
     </div>
-@endsection
-
-@section('scripts')
+    <div class="cf-success-title">Yay! Pembayaran Berhasil</div>
+    <p class="cf-success-sub">Langgananmu sudah aktif. Selamat menikmati ribuan film & series tanpa batas!</p>
+    <a href="/" class="btn-cf-start">
+        <i class="fa-solid fa-play me-2"></i>Mulai Nonton
+    </a>
+</div>
 @endsection

@@ -48,6 +48,7 @@ class MovieController extends Controller implements HasMiddleware
     public function show(Movie $movie)
     {
         $userPlan = Auth::user()->getCurrentPlan();
+        // dd($userPlan);
         $streamingUrl = $movie->getStreamingUrl($userPlan->resolution);
 
         // dd($movie);
